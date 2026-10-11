@@ -1144,6 +1144,25 @@ ALTER TYPE "public"."message_role" ADD VALUE 'system';
 
 ALTER TABLE "users" ADD COLUMN "github_installation_id" text;
 
+-- Reconcile chat schema changes not covered by the historical migrations.
+
+DO $
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_type t
+        JOIN pg_namespace n ON n.oid = t.typnamespace
+        WHERE n.nspname = 'public' AND t.typname = 'agent_type'
+    ) THEN
+        CREATE TYPE public.agent_type AS ENUM ('root', 'user');
+    END IF;
+END $;
+
+ALTER TABLE public.conversations
+    ADD COLUMN IF NOT EXISTS agent_type public.agent_type DEFAULT 'root';
+
+ALTER TABLE public.messages
+    ADD COLUMN IF NOT EXISTS usage jsonb;
+
 -- Pin SECURITY DEFINER lookup to the application schema.
 ALTER FUNCTION public.user_has_project_access(uuid, text[]) SET search_path = public;
 ALTER FUNCTION public.user_has_canvas_access(uuid, text[]) SET search_path = public;

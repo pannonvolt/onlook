@@ -7,6 +7,7 @@ export const env = createEnv({
      * isn't built with invalid env vars.
      */
     server: {
+        SELF_HOSTED_MODE: z.enum(['true', 'false']).default('false'),
         NODE_ENV: z.enum(['development', 'test', 'production']),
         CSB_API_KEY: z.string(),
         SUPABASE_DATABASE_URL: z.url(),
@@ -83,6 +84,7 @@ export const env = createEnv({
      * middlewares) or client-side so we need to destruct manually.
      */
     runtimeEnv: {
+        SELF_HOSTED_MODE: process.env.SELF_HOSTED_MODE,
         NODE_ENV: process.env.NODE_ENV,
         CSB_API_KEY: process.env.CSB_API_KEY,
         RESEND_API_KEY: process.env.RESEND_API_KEY,

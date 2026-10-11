@@ -1,3 +1,4 @@
+import { env } from '@/env';
 import { and, eq, isNull } from 'drizzle-orm';
 
 import { legacySubscriptions, subscriptions } from '@onlook/db';
@@ -13,6 +14,15 @@ export async function checkUserSubscriptionAccess(
     userId: string,
     userEmail?: string | null,
 ): Promise<UserSubscriptionStatus> {
+    // Private self-hosted installs do not use hosted-product subscriptions.
+    // Callers still require a valid authenticated session.
+    if (env.SELF_HOSTED_MODE === 'true') {
+        return {
+            hasActiveSubscription: true,
+            hasLegacySubscription: false,
+        };
+    }
+
     const subscription = await db.query.subscriptions.findFirst({
         where: and(
             eq(subscriptions.userId, userId),

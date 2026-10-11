@@ -53,12 +53,17 @@ export async function POST(req: NextRequest) {
 
 export const streamResponse = async (req: NextRequest, userId: string) => {
     const body = await req.json();
-    const { messages, chatType, conversationId, projectId } = body as {
+    const { messages, chatType, conversationId, projectId, model } = body as {
         messages: ChatMessage[],
         chatType: ChatType,
         conversationId: string,
         projectId: string,
+        model?: string,
     };
+    if (model !== undefined && (typeof model !== 'string' || model.length > 200 ||
+        !/^[a-zA-Z0-9._-]+\/[a-zA-Z0-9._:/-]+$/.test(model))) {
+        return Response.json({ error: 'Invalid OpenRouter model ID.' }, { status: 400 });
+    }
     // Updating the usage record and rate limit is done here to avoid
     // abuse in the case where a single user sends many concurrent requests.
     // If the call below fails, the user will not be penalized.
@@ -81,6 +86,7 @@ export const streamResponse = async (req: NextRequest, userId: string) => {
             userId,
             traceId,
             messages,
+            model,
         });
         return stream.toUIMessageStreamResponse<ChatMessage>(
             {

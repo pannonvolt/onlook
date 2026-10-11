@@ -1,5 +1,5 @@
 import type { SendMessage } from '@/app/project/[id]/_hooks/use-chat';
-import { type ChatType } from '@onlook/models';
+import { OPENROUTER_MODELS, type ChatType } from '@onlook/models';
 import { makeAutoObservable } from 'mobx';
 import type { EditorEngine } from '../engine';
 import { ChatContext } from './context';
@@ -13,6 +13,7 @@ export class ChatManager {
     // Content sent from useChat hook
     _sendMessageAction: SendMessage | null = null;
     isStreaming = false;
+    selectedModel: string = OPENROUTER_MODELS.CLAUDE_4_5_SONNET;
 
     constructor(private editorEngine: EditorEngine) {
         this.context = new ChatContext(this.editorEngine);
@@ -21,7 +22,24 @@ export class ChatManager {
     }
 
     init() {
+        try {
+            const savedModel = localStorage.getItem('onlook-chat-model');
+            if (savedModel && savedModel.length <= 200 && /^[a-zA-Z0-9._-]+\/[a-zA-Z0-9._:/-]+$/.test(savedModel)) {
+                this.selectedModel = savedModel;
+            }
+        } catch {
+            // Storage may be disabled in the browser.
+        }
         this.context.init();
+    }
+
+    setSelectedModel(model: string) {
+        this.selectedModel = model;
+        try {
+            localStorage.setItem('onlook-chat-model', model);
+        } catch {
+            // The current session still uses the selected model.
+        }
     }
 
     focusChatInput() {

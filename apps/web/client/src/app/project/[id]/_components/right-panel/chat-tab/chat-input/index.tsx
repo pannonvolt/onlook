@@ -7,7 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { z } from 'zod';
 
 import type { ChatMessage, ImageMessageContext, QueuedMessage } from '@onlook/models';
-import { ChatType } from '@onlook/models';
+import { ChatType, OPENROUTER_MODELS } from '@onlook/models';
 import { MessageContextType } from '@onlook/models/chat';
 import { Button } from '@onlook/ui/button';
 import { Icons } from '@onlook/ui/icons';
@@ -62,6 +62,31 @@ export const ChatInput = observer(
         const [isDragging, setIsDragging] = useState(false);
         const chatMode = editorEngine.state.chatMode;
         const [inputValue, setInputValue] = useState('');
+        const [showCustomModel, setShowCustomModel] = useState(false);
+        const [customModel, setCustomModel] = useState('');
+        const modelOptions = [
+            { id: OPENROUTER_MODELS.CLAUDE_4_5_SONNET, name: 'Claude Sonnet 4.5' },
+            { id: OPENROUTER_MODELS.CLAUDE_3_5_HAIKU, name: 'Claude Haiku 3.5' },
+            { id: OPENROUTER_MODELS.OPEN_AI_GPT_5, name: 'GPT-5' },
+            { id: OPENROUTER_MODELS.OPEN_AI_GPT_5_MINI, name: 'GPT-5 Mini' },
+            { id: OPENROUTER_MODELS.OPEN_AI_GPT_5_NANO, name: 'GPT-5 Nano' },
+        ];
+        const selectedModel = editorEngine.chat.selectedModel;
+        const isCustomModel = !modelOptions.some(option => option.id === selectedModel);
+
+        useEffect(() => {
+            setCustomModel(selectedModel);
+        }, [selectedModel]);
+
+        const applyCustomModel = () => {
+            const model = customModel.trim();
+            if (!z.string().max(200).regex(/^[a-zA-Z0-9._-]+\/[a-zA-Z0-9._:/-]+$/).safeParse(model).success) {
+                toast.error(t('chatModel.invalid'));
+                return;
+            }
+            editorEngine.chat.setSelectedModel(model);
+            setShowCustomModel(false);
+        };
         const lastUsageMessage = useMemo(
             () => messages.findLast((msg) => msg.metadata?.usage),
             [messages],
@@ -410,6 +435,52 @@ export const ChatInput = observer(
                 <div className="flex w-full flex-col p-2">
                     <QueueItems queuedMessages={queuedMessages} removeFromQueue={removeFromQueue} />
                     <InputContextPills />
+                    <div className="flex flex-col gap-2 px-2 py-1">
+                        <label className="flex items-center gap-2 text-xs">
+                            <span>{t('chatModel.label')}</span>
+                            <select
+                                aria-label={t('chatModel.label')}
+                                className="min-w-0 flex-1 rounded border bg-background-primary px-2 py-1 text-foreground-primary"
+                                value={showCustomModel || isCustomModel ? 'custom' : selectedModel}
+                                disabled={isStreaming}
+                                onChange={(event) => {
+                                    const model = event.target.value;
+                                    setShowCustomModel(model === 'custom');
+                                    if (model !== 'custom') editorEngine.chat.setSelectedModel(model);
+                                }}
+                            >
+                                {modelOptions.map(option => (
+                                    <option key={option.id} value={option.id}>{option.name}</option>
+                                ))}
+                                <option value="custom">{t('chatModel.custom')}</option>
+                            </select>
+                        </label>
+                        {(showCustomModel || isCustomModel) && (
+                            <div className="flex flex-col gap-1">
+                                <div className="flex gap-2">
+                                    <input
+                                        aria-label={t('chatModel.id')}
+                                        placeholder={t('chatModel.id')}
+                                        className="min-w-0 flex-1 rounded border bg-background-primary px-2 py-1 text-xs text-foreground-primary"
+                                        value={customModel}
+                                        disabled={isStreaming}
+                                        onChange={event => setCustomModel(event.target.value)}
+                                        onKeyDown={event => {
+                                            if (event.key === 'Enter') {
+                                                event.preventDefault();
+                                                event.stopPropagation();
+                                                applyCustomModel();
+                                            }
+                                        }}
+                                    />
+                                    <Button size="sm" variant="secondary" disabled={isStreaming} onClick={applyCustomModel}>
+                                        {t('chatModel.apply')}
+                                    </Button>
+                                </div>
+                                <span className="break-all text-xs">{t('chatModel.active', { model: selectedModel })}</span>
+                            </div>
+                        )}
+                    </div>
                     <Textarea
                         ref={textareaRef}
                         placeholder={getPlaceholderText()}

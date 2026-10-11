@@ -49,10 +49,11 @@ export function useChat({ conversationId, projectId, initialMessages }: UseChatP
             sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
             transport: new DefaultChatTransport({
                 api: '/api/chat',
-                body: {
+                body: () => ({
                     conversationId,
                     projectId,
-                },
+                    model: editorEngine.chat.selectedModel,
+                }),
             }),
             onToolCall: async (toolCall) => {
                 setIsExecutingToolCall(true);

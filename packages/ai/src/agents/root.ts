@@ -10,6 +10,7 @@ export const createRootAgentStream = ({
     userId,
     traceId,
     messages,
+    model,
 }: {
     chatType: ChatType;
     conversationId: string;
@@ -17,8 +18,11 @@ export const createRootAgentStream = ({
     userId: string;
     traceId: string;
     messages: ChatMessage[];
+    model?: string;
 }) => {
-    const modelConfig = getModelFromType(chatType);
+    const modelConfig = model
+        ? initModel({ provider: LLMProvider.OPENROUTER, model })
+        : getModelFromType(chatType);
     const systemPrompt = getSystemPromptFromType(chatType);
     const toolSet = getToolSetFromType(chatType);
     return streamText({

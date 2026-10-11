@@ -1,4 +1,12 @@
 {
+    "chatModel": {
+        "label": "AIモデル",
+        "custom": "他のOpenRouterモデル",
+        "id": "OpenRouterモデルID (provider/model)",
+        "apply": "適用",
+        "invalid": "openai/gpt-5のような有効なモデルIDを入力してください。",
+        "active": "使用中: {model}"
+    },
     "pricing": {
         "plans": {
             "basic": {

@@ -1,4 +1,12 @@
 {
+    "chatModel": {
+        "label": "AI模型",
+        "custom": "其他OpenRouter模型",
+        "id": "OpenRouter模型ID (provider/model)",
+        "apply": "应用",
+        "invalid": "请输入有效的模型ID，例如 openai/gpt-5。",
+        "active": "当前: {model}"
+    },
     "projects": {
         "create": {
             "settings": {

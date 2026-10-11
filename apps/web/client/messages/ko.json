@@ -1,4 +1,12 @@
 {
+    "chatModel": {
+        "label": "AI 모델",
+        "custom": "다른 OpenRouter 모델",
+        "id": "OpenRouter 모델 ID (provider/model)",
+        "apply": "적용",
+        "invalid": "openai/gpt-5와 같은 유효한 모델 ID를 입력하세요.",
+        "active": "사용 중: {model}"
+    },
     "projects": {
         "create": {
             "settings": {

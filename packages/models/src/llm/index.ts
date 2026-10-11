@@ -14,7 +14,7 @@ export enum OPENROUTER_MODELS {
 }
 
 interface ModelMapping {
-    [LLMProvider.OPENROUTER]: OPENROUTER_MODELS;
+    [LLMProvider.OPENROUTER]: string;
 }
 
 export type InitialModelPayload = {

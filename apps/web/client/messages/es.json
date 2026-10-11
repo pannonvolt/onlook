@@ -1,4 +1,12 @@
 {
+    "chatModel": {
+        "label": "Modelo de IA",
+        "custom": "Otro modelo de OpenRouter",
+        "id": "ID de modelo de OpenRouter (proveedor/modelo)",
+        "apply": "Aplicar",
+        "invalid": "Introduce un ID de modelo válido, como openai/gpt-5.",
+        "active": "Activo: {model}"
+    },
     "projects": {
         "create": {
             "settings": {

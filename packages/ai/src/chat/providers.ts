@@ -16,7 +16,7 @@ export function initModel({
     let model: LanguageModel;
     let providerOptions: Record<string, any> | undefined;
     let headers: Record<string, string> | undefined;
-    let maxOutputTokens: number = MODEL_MAX_TOKENS[requestedModel];
+    let maxOutputTokens: number = MODEL_MAX_TOKENS[requestedModel as OPENROUTER_MODELS] ?? 32768;
 
     switch (requestedProvider) {
         case LLMProvider.OPENROUTER:
@@ -45,7 +45,7 @@ export function initModel({
     };
 }
 
-function getOpenRouterProvider(model: OPENROUTER_MODELS): LanguageModel {
+function getOpenRouterProvider(model: string): LanguageModel {
     if (!process.env.OPENROUTER_API_KEY) {
         throw new Error('OPENROUTER_API_KEY must be set');
     }
